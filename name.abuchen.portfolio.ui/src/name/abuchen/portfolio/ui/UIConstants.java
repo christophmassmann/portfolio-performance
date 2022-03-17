@@ -174,6 +174,12 @@ public interface UIConstants
          * Preference key for preset time in new transactions.
          */
         String PRESET_VALUE_TIME = "PRESET_VALUE_TIME"; //$NON-NLS-1$
+
+        String RUN_WEB_SERVER = "RUN_WEB_SERVER"; //$NON-NLS-1$
+
+        String WEB_SERVER_PORT = "WEB_SERVER_PORT"; //$NON-NLS-1$
+
+        String WEB_SERVER_TOKEN = "WEB_SERVER_TOKEN"; //$NON-NLS-1$
     }
 
     interface CSS // NOSONAR
