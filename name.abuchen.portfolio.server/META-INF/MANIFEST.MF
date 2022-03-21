@@ -29,4 +29,5 @@ Require-Bundle: name.abuchen.portfolio;bundle-version="0.56.7",
  javax.inject,
  javax.servlet,
  org.eclipse.osgi
-Import-Package: org.eclipse.core.runtime
+Import-Package: name.abuchen.portfolio.ui,
+ org.eclipse.core.runtime

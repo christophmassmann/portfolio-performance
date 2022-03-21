@@ -31,6 +31,7 @@ public class JPortfolio
         p.name = portfolio.getName();
         p.uuid = portfolio.getUUID();
         p.snapshotValue = snapshot.getValue();
+        
         return p;
     }
 

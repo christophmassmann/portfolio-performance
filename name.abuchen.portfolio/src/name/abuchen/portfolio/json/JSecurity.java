@@ -7,12 +7,18 @@ import name.abuchen.portfolio.model.Security;
 
 public class JSecurity
 {
+    private String id;
     private String name;
     private String isin;
     private String wkn;
     private String ticker;
     private String currency;
     private LatestSecurityPrice latest;
+    
+    public String getId()
+    {
+        return id;
+    }
 
     public String getName()
     {
@@ -78,6 +84,8 @@ public class JSecurity
         s.ticker = Strings.emptyToNull(security.getTickerSymbol());
         s.currency = Strings.emptyToNull(security.getCurrencyCode());
         s.latest = security.getLatest();
+        s.id = security.getUUID();
+        
         return s;
     }
 }
