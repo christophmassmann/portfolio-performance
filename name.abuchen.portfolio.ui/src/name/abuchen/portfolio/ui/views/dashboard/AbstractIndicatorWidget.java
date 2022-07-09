@@ -36,10 +36,11 @@ public abstract class AbstractIndicatorWidget<D> extends WidgetDelegate<D>
         title = new Label(container, SWT.NONE);
         title.setText(TextUtil.tooltip(getWidget().getLabel()));
         title.setBackground(Colors.theme().defaultBackground());
+        title.setData(UIConstants.CSS.CLASS_NAME, this.getClassNameByLabel());
         GridDataFactory.fillDefaults().grab(true, false).applyTo(title);
 
         indicator = new ColoredLabel(container, SWT.NONE);
-        indicator.setData(UIConstants.CSS.CLASS_NAME, UIConstants.CSS.KPI);
+        indicator.setData(UIConstants.CSS.CLASS_NAME, UIConstants.CSS.KPI + " " + this.getClassNameByLabel()); //$NON-NLS-1$
         indicator.setBackground(Colors.theme().defaultBackground());
         indicator.setText(""); //$NON-NLS-1$
         GridDataFactory.fillDefaults().grab(true, false).applyTo(indicator);
@@ -57,5 +58,10 @@ public abstract class AbstractIndicatorWidget<D> extends WidgetDelegate<D>
     public void update(D data)
     {
         this.title.setText(TextUtil.tooltip(getWidget().getLabel()));
+    }
+
+    protected String getClassNameByLabel()
+    {
+        return getWidget().getLabel().replaceAll("[^a-zA-Z]", "").toLowerCase(); //$NON-NLS-1$ //$NON-NLS-2$
     }
 }

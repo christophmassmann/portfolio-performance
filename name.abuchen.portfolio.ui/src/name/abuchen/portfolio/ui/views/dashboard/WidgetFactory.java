@@ -252,6 +252,9 @@ public enum WidgetFactory
 
     LIMIT_EXCEEDED(Messages.SecurityListFilterLimitPriceExceeded, Messages.LabelCommon, LimitExceededWidget::new),
 
+    SINGLE_LIMIT_EXCEEDED(Messages.SecurityListFilterSingleLimitPriceExceeded, Messages.LabelCommon,
+                    SingleLimitExceededWidget::new),
+
     FOLLOW_UP(Messages.SecurityListFilterDateReached, Messages.LabelCommon, FollowUpWidget::new),
 
     // typo is API now!!

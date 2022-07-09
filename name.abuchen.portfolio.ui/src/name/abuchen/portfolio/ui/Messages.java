@@ -1079,6 +1079,7 @@ public class Messages extends NLS
     public static String SecurityListFilterLimitPriceExceeded;
     public static String SecurityListFilterOnlyExchangeRates;
     public static String SecurityListFilterOnlySecurities;
+    public static String SecurityListFilterSingleLimitPriceExceeded;
     public static String SecurityMenuAddNewSecurity;
     public static String SecurityMenuAddNewSecurityDescription;
     public static String SecurityMenuAddPrice;
