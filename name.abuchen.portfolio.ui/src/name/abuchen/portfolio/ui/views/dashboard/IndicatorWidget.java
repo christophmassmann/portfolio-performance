@@ -3,6 +3,7 @@ package name.abuchen.portfolio.ui.views.dashboard;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.function.BiFunction;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.eclipse.swt.widgets.Composite;
@@ -25,6 +26,7 @@ public class IndicatorWidget<N extends Number> extends AbstractIndicatorWidget<N
         private BiFunction<DataSeries, Interval, String> tooltip;
         private boolean supportsBenchmarks = true;
         private boolean isValueColored = true;
+        private Predicate<DataSeries> dsFilter;
 
         public Builder(Widget widget, DashboardData dashboardData)
         {
@@ -62,12 +64,19 @@ public class IndicatorWidget<N extends Number> extends AbstractIndicatorWidget<N
             return this;
         }
 
+        Builder<N> withDataSeriesFilter(Predicate<DataSeries> dsFilter)
+        {
+            this.dsFilter = dsFilter;
+            return this;
+        }
+
         IndicatorWidget<N> build()
         {
             Objects.requireNonNull(formatter);
             Objects.requireNonNull(provider);
 
-            IndicatorWidget<N> indicatorWidget = new IndicatorWidget<>(widget, dashboardData, supportsBenchmarks);
+            IndicatorWidget<N> indicatorWidget = new IndicatorWidget<>(widget, dashboardData, supportsBenchmarks,
+                            this.dsFilter);
             indicatorWidget.setFormatter(formatter);
             indicatorWidget.setProvider(provider);
             indicatorWidget.setTooltip(tooltip);
@@ -84,6 +93,12 @@ public class IndicatorWidget<N extends Number> extends AbstractIndicatorWidget<N
     public IndicatorWidget(Widget widget, DashboardData dashboardData, boolean supportsBenchmarks)
     {
         super(widget, dashboardData, supportsBenchmarks);
+    }
+
+    public IndicatorWidget(Widget widget, DashboardData dashboardData, boolean supportsBenchmarks,
+                    Predicate<DataSeries> dsFilter)
+    {
+        super(widget, dashboardData, supportsBenchmarks, dsFilter);
     }
 
     public static <N extends Number> Builder<N> create(Widget widget, DashboardData dashboardData)

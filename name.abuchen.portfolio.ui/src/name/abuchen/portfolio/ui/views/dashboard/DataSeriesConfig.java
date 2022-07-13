@@ -1,6 +1,7 @@
 package name.abuchen.portfolio.ui.views.dashboard;
 
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jface.action.IMenuManager;
@@ -21,6 +22,7 @@ public class DataSeriesConfig implements WidgetConfig
     private final boolean supportsBenchmarks;
     private final String label;
     private final Dashboard.Config configurationKey;
+    private final Predicate<DataSeries> dsFilter;
 
     private DataSeries dataSeries;
 
@@ -32,17 +34,27 @@ public class DataSeriesConfig implements WidgetConfig
     protected DataSeriesConfig(WidgetDelegate<?> delegate, boolean supportsBenchmarks, boolean supportsEmptyDataSeries,
                     String label, Dashboard.Config configurationKey)
     {
+        this(delegate, supportsBenchmarks, supportsEmptyDataSeries, label, configurationKey, null);
+    }
+
+    protected DataSeriesConfig(WidgetDelegate<?> delegate, boolean supportsBenchmarks, boolean supportsEmptyDataSeries,
+                    String label, Dashboard.Config configurationKey, Predicate<DataSeries> dsFilter)
+    {
+        if (dsFilter == null)
+            dsFilter = (ds -> true);
+
         this.delegate = delegate;
         this.supportsBenchmarks = supportsBenchmarks;
         this.label = label;
         this.configurationKey = configurationKey;
+        this.dsFilter = dsFilter;
 
         String uuid = delegate.getWidget().getConfiguration().get(configurationKey.name());
         if (uuid != null && !uuid.isEmpty())
             dataSeries = delegate.getDashboardData().getDataSeriesSet().lookup(uuid);
         if (dataSeries == null && !supportsEmptyDataSeries)
             dataSeries = delegate.getDashboardData().getDataSeriesSet().getAvailableSeries().stream()
-                            .filter(ds -> ds.getType().equals(DataSeries.Type.CLIENT)).findAny()
+                            .filter(dsFilter.and(ds -> ds.getType().equals(DataSeries.Type.CLIENT))).findAny()
                             .orElseThrow(IllegalArgumentException::new);
     }
 
@@ -72,7 +84,8 @@ public class DataSeriesConfig implements WidgetConfig
     private void doAddSeries(boolean showOnlyBenchmark)
     {
         List<DataSeries> list = delegate.getDashboardData().getDataSeriesSet().getAvailableSeries().stream()
-                        .filter(ds -> ds.isBenchmark() == showOnlyBenchmark).collect(Collectors.toList());
+                        .filter(this.dsFilter.and(ds -> ds.isBenchmark() == showOnlyBenchmark))
+                        .collect(Collectors.toList());
 
         DataSeriesSelectionDialog dialog = new DataSeriesSelectionDialog(Display.getDefault().getActiveShell());
         dialog.setElements(list);

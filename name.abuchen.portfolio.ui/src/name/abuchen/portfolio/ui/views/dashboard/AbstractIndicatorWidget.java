@@ -1,5 +1,7 @@
 package name.abuchen.portfolio.ui.views.dashboard;
 
+import java.util.function.Predicate;
+
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -7,10 +9,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
+import name.abuchen.portfolio.model.Dashboard;
 import name.abuchen.portfolio.model.Dashboard.Widget;
+import name.abuchen.portfolio.ui.Messages;
 import name.abuchen.portfolio.ui.UIConstants;
 import name.abuchen.portfolio.ui.util.Colors;
 import name.abuchen.portfolio.ui.util.swt.ColoredLabel;
+import name.abuchen.portfolio.ui.views.dataseries.DataSeries;
 import name.abuchen.portfolio.util.TextUtil;
 
 public abstract class AbstractIndicatorWidget<D> extends WidgetDelegate<D>
@@ -20,9 +25,16 @@ public abstract class AbstractIndicatorWidget<D> extends WidgetDelegate<D>
 
     protected AbstractIndicatorWidget(Widget widget, DashboardData dashboardData, boolean supportsBenchmarks)
     {
+        this(widget, dashboardData, supportsBenchmarks, null);
+    }
+
+    protected AbstractIndicatorWidget(Widget widget, DashboardData dashboardData, boolean supportsBenchmarks,
+                    Predicate<DataSeries> dsFilter)
+    {
         super(widget, dashboardData);
 
-        addConfig(new DataSeriesConfig(this, supportsBenchmarks));
+        addConfig(new DataSeriesConfig(this, supportsBenchmarks, false, Messages.LabelDataSeries,
+                        Dashboard.Config.DATA_SERIES, dsFilter));
         addConfig(new ReportingPeriodConfig(this));
     }
 
