@@ -31,6 +31,11 @@ public class DataSeriesConfig implements WidgetConfig
         this(delegate, supportsBenchmarks, false, Messages.LabelDataSeries, Dashboard.Config.DATA_SERIES);
     }
 
+    public DataSeriesConfig(WidgetDelegate<?> delegate, boolean supportsBenchmarks, Predicate<DataSeries> dsFilter)
+    {
+        this(delegate, supportsBenchmarks, false, Messages.LabelDataSeries, Dashboard.Config.DATA_SERIES, dsFilter);
+    }
+
     protected DataSeriesConfig(WidgetDelegate<?> delegate, boolean supportsBenchmarks, boolean supportsEmptyDataSeries,
                     String label, Dashboard.Config configurationKey)
     {
@@ -73,19 +78,20 @@ public class DataSeriesConfig implements WidgetConfig
         MenuManager subMenu = new MenuManager(label, configurationKey.name());
         subMenu.add(new LabelOnly(dataSeries != null ? dataSeries.getLabel() : "-")); //$NON-NLS-1$
         subMenu.add(new Separator());
-        subMenu.add(new SimpleAction(Messages.MenuSelectDataSeries, a -> doAddSeries(false)));
+        subMenu.add(new SimpleAction(Messages.MenuSelectDataSeries,
+                        a -> doAddSeries(this.dsFilter.and(ds -> !ds.isBenchmark()))));
 
         if (supportsBenchmarks)
-            subMenu.add(new SimpleAction(Messages.MenuSelectBenchmarkDataSeries, a -> doAddSeries(true)));
+            subMenu.add(new SimpleAction(Messages.MenuSelectBenchmarkDataSeries,
+                            a -> doAddSeries(this.dsFilter.and(DataSeries::isBenchmark))));
 
         manager.add(subMenu);
     }
 
-    private void doAddSeries(boolean showOnlyBenchmark)
+    private void doAddSeries(Predicate<DataSeries> dsFilter)
     {
         List<DataSeries> list = delegate.getDashboardData().getDataSeriesSet().getAvailableSeries().stream()
-                        .filter(this.dsFilter.and(ds -> ds.isBenchmark() == showOnlyBenchmark))
-                        .collect(Collectors.toList());
+                        .filter(dsFilter).collect(Collectors.toList());
 
         DataSeriesSelectionDialog dialog = new DataSeriesSelectionDialog(Display.getDefault().getActiveShell());
         dialog.setElements(list);

@@ -9,9 +9,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
-import name.abuchen.portfolio.model.Dashboard;
 import name.abuchen.portfolio.model.Dashboard.Widget;
-import name.abuchen.portfolio.ui.Messages;
 import name.abuchen.portfolio.ui.UIConstants;
 import name.abuchen.portfolio.ui.util.Colors;
 import name.abuchen.portfolio.ui.util.swt.ColoredLabel;
@@ -33,8 +31,7 @@ public abstract class AbstractIndicatorWidget<D> extends WidgetDelegate<D>
     {
         super(widget, dashboardData);
 
-        addConfig(new DataSeriesConfig(this, supportsBenchmarks, false, Messages.LabelDataSeries,
-                        Dashboard.Config.DATA_SERIES, dsFilter));
+        addConfig(new DataSeriesConfig(this, supportsBenchmarks, dsFilter));
         addConfig(new ReportingPeriodConfig(this));
     }
 
