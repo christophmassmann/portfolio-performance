@@ -1,5 +1,6 @@
 package name.abuchen.portfolio.ui.views.dashboard;
 
+import java.time.LocalDate;
 import java.util.function.Predicate;
 
 import javax.inject.Inject;
@@ -14,9 +15,11 @@ import org.eclipse.swt.widgets.Label;
 
 import name.abuchen.portfolio.model.Dashboard.Widget;
 import name.abuchen.portfolio.model.Security;
+import name.abuchen.portfolio.snapshot.PerformanceIndex;
 import name.abuchen.portfolio.ui.UIConstants;
 import name.abuchen.portfolio.ui.editor.AbstractFinanceView;
 import name.abuchen.portfolio.ui.util.Colors;
+import name.abuchen.portfolio.ui.util.WidgetHealthIndicator;
 import name.abuchen.portfolio.ui.util.swt.ColoredLabel;
 import name.abuchen.portfolio.ui.views.dataseries.DataSeries;
 import name.abuchen.portfolio.util.TextUtil;
@@ -28,6 +31,7 @@ public abstract class AbstractIndicatorWidget<D> extends WidgetDelegate<D>
 
     protected Label title;
     protected ColoredLabel indicator;
+    protected WidgetHealthIndicator healthIndicator;
 
     protected AbstractIndicatorWidget(Widget widget, DashboardData dashboardData, boolean supportsBenchmarks,
                     Predicate<DataSeries> predicate)
@@ -46,11 +50,20 @@ public abstract class AbstractIndicatorWidget<D> extends WidgetDelegate<D>
         container.setData(UIConstants.CSS.CLASS_NAME, this.getContainerCssClassNames());
         GridLayoutFactory.fillDefaults().numColumns(1).margins(5, 5).applyTo(container);
 
-        title = new Label(container, SWT.NONE);
+        Composite containerHeader = new Composite(container, SWT.NONE);
+        containerHeader.setBackground(parent.getBackground());
+        GridLayoutFactory.fillDefaults().numColumns(2).applyTo(containerHeader);
+
+        title = new Label(containerHeader, SWT.NONE);
         title.setText(TextUtil.tooltip(getWidget().getLabel()));
         title.setBackground(Colors.theme().defaultBackground());
         title.setData(UIConstants.CSS.CLASS_NAME, UIConstants.CSS.TITLE);
         GridDataFactory.fillDefaults().grab(true, false).applyTo(title);
+
+        PerformanceIndex index = this.getDashboardData().calculate(get(DataSeriesConfig.class).getDataSeries(),
+                        get(ReportingPeriodConfig.class).getReportingPeriod().toInterval(LocalDate.now()));
+
+        this.healthIndicator = new WidgetHealthIndicator(containerHeader, index);
 
         indicator = new ColoredLabel(container, SWT.NONE);
         indicator.setData(UIConstants.CSS.CLASS_NAME, UIConstants.CSS.KPI);
@@ -76,5 +89,8 @@ public abstract class AbstractIndicatorWidget<D> extends WidgetDelegate<D>
     public void update(D data)
     {
         this.title.setText(TextUtil.tooltip(getWidget().getLabel()));
+        this.title.requestLayout();
+
+        this.healthIndicator.update();
     }
 }

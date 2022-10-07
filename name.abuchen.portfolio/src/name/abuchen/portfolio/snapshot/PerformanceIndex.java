@@ -9,10 +9,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.IntPredicate;
 import java.util.function.ToLongBiFunction;
+import java.util.stream.Collectors;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -57,6 +59,8 @@ public class PerformanceIndex
     protected double[] accumulated;
     protected double[] delta;
 
+    protected HashSet<Security> securities;
+
     private Drawdown drawdown;
     private Volatility volatility;
     private ClientPerformanceSnapshot performanceSnapshot;
@@ -66,6 +70,8 @@ public class PerformanceIndex
         this.client = client;
         this.converter = converter;
         this.reportInterval = reportInterval;
+
+        this.securities = new HashSet<Security>();
     }
 
     public static PerformanceIndex forClient(Client client, CurrencyConverter converter, Interval reportInterval,
@@ -147,6 +153,12 @@ public class PerformanceIndex
     public LocalDate[] getDates()
     {
         return dates;
+    }
+
+    public List<Security> getSecurities()
+    {
+        return this.securities.isEmpty() ? getClient().getSecurities()
+                        : this.securities.stream().collect(Collectors.toList());
     }
 
     public double[] getAccumulatedPercentage()

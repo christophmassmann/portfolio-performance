@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import name.abuchen.portfolio.Messages;
 import name.abuchen.portfolio.model.Account;
@@ -78,6 +79,13 @@ import name.abuchen.portfolio.util.Interval;
 
             snapshot = ClientSnapshot.create(getClient(), getCurrencyConverter(), dates[index]);
             long thisValuation = totals[index] = snapshot.getMonetaryAssets().getAmount();
+
+            List<AssetPosition> assets = snapshot.getAssetPositions().collect(Collectors.toList());
+            for (AssetPosition asset : assets)
+            {
+                if (asset.getSecurity() != null)
+                    this.securities.add(asset.getSecurity());
+            }
 
             if (valuation + inboundTransferals[index] == 0)
             {

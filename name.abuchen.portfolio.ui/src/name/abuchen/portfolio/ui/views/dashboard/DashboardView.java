@@ -574,7 +574,17 @@ public class DashboardView extends AbstractHistoricView
         addDropListener(element);
 
         for (Control child : element.getChildren())
+        {
             addDragListener(child);
+
+            if (child instanceof Composite)
+            {
+                for (Control subChild : ((Composite) child).getChildren())
+                {
+                    addDragListener(subChild);
+                }
+            }
+        }
 
         GridDataFactory.fillDefaults().grab(true, false).applyTo(element);
         return delegate;
