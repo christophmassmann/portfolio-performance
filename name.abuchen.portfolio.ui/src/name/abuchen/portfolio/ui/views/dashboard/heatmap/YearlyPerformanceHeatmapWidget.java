@@ -2,11 +2,13 @@ package name.abuchen.portfolio.ui.views.dashboard.heatmap;
 
 import java.time.LocalDate;
 import java.time.Year;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import name.abuchen.portfolio.model.Dashboard.Widget;
+import name.abuchen.portfolio.model.Security;
 import name.abuchen.portfolio.money.Values;
 import name.abuchen.portfolio.snapshot.PerformanceIndex;
 import name.abuchen.portfolio.snapshot.ReportingPeriod;
@@ -26,6 +28,18 @@ public class YearlyPerformanceHeatmapWidget extends AbstractHeatmapWidget<Double
         addConfig(new ColorSchemaConfig(this));
         addConfig(new HeatmapOrnamentConfig(this));
         addConfig(new MultiDataSeriesConfig(this));
+    }
+
+    @Override
+    public void update(HeatmapModel<Double> model)
+    {
+        super.update(model);
+
+        Interval interval = get(ReportingPeriodConfig.class).getReportingPeriod().toInterval(LocalDate.now());
+        List<Security> securities = new ArrayList<>();
+        get(MultiDataSeriesConfig.class).getDataSeries().forEach(s -> securities
+                        .addAll(getDashboardData().getDataSeriesCache().lookup(s, interval).getSecurities()));
+        healthIndicator.setSecurities(securities);
     }
 
     @Override

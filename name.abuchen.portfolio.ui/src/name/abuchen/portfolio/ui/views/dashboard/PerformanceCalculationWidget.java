@@ -22,6 +22,7 @@ import name.abuchen.portfolio.snapshot.ClientPerformanceSnapshot.CategoryType;
 import name.abuchen.portfolio.snapshot.PerformanceIndex;
 import name.abuchen.portfolio.ui.Messages;
 import name.abuchen.portfolio.ui.UIConstants;
+import name.abuchen.portfolio.ui.util.WidgetHealthIndicator;
 import name.abuchen.portfolio.util.TextUtil;
 
 public class PerformanceCalculationWidget extends WidgetDelegate<ClientPerformanceSnapshot>
@@ -58,6 +59,7 @@ public class PerformanceCalculationWidget extends WidgetDelegate<ClientPerforman
     private Label[] signs;
     private Label[] labels;
     private Label[] values;
+    protected WidgetHealthIndicator healthIndicator;
 
     public PerformanceCalculationWidget(Widget widget, DashboardData dashboardData)
     {
@@ -76,11 +78,18 @@ public class PerformanceCalculationWidget extends WidgetDelegate<ClientPerforman
         container.setBackground(parent.getBackground());
         container.setData(UIConstants.CSS.CLASS_NAME, this.getContainerCssClassNames());
 
-        title = new Label(container, SWT.NONE);
+        Composite containerHeader = new Composite(container, SWT.NONE);
+        containerHeader.setBackground(parent.getBackground());
+        GridDataFactory.fillDefaults().grab(true, false).span(3, 1).applyTo(containerHeader);
+        GridLayoutFactory.fillDefaults().numColumns(2).applyTo(containerHeader);
+
+        title = new Label(containerHeader, SWT.NONE);
         title.setText(TextUtil.tooltip(getWidget().getLabel()));
         title.setBackground(container.getBackground());
         title.setData(UIConstants.CSS.CLASS_NAME, UIConstants.CSS.TITLE);
-        GridDataFactory.fillDefaults().span(3, 1).grab(true, false).applyTo(title);
+        GridDataFactory.fillDefaults().applyTo(title);
+
+        healthIndicator = new WidgetHealthIndicator(containerHeader);
 
         TableLayout layout = get(LayoutConfig.class).getValue();
 
@@ -178,6 +187,12 @@ public class PerformanceCalculationWidget extends WidgetDelegate<ClientPerforman
         }
 
         title.setText(TextUtil.tooltip(getWidget().getLabel()));
+        title.requestLayout();
+
+        PerformanceIndex index = getDashboardData().getDataSeriesCache().lookup(
+                        get(DataSeriesConfig.class).getDataSeries(),
+                        get(ReportingPeriodConfig.class).getReportingPeriod().toInterval(LocalDate.now()));
+        healthIndicator.setSecurities(index.getSecurities());
 
         switch (layout)
         {

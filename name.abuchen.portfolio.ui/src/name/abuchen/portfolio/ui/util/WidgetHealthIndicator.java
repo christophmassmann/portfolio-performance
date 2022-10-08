@@ -1,6 +1,7 @@
 package name.abuchen.portfolio.ui.util;
 
-import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,17 +16,15 @@ import org.eclipse.swt.widgets.Control;
 
 import name.abuchen.portfolio.model.Security;
 import name.abuchen.portfolio.money.Values;
-import name.abuchen.portfolio.snapshot.PerformanceIndex;
+import name.abuchen.portfolio.util.SecurityTimeliness;
 
 public class WidgetHealthIndicator
 {
     protected Canvas control;
-    protected PerformanceIndex index;
+    protected List<Security> securities;
 
-    public WidgetHealthIndicator(Composite parent, PerformanceIndex index)
+    public WidgetHealthIndicator(Composite parent)
     {
-        this.index = index;
-
         this.control = new Canvas(parent, SWT.NONE);
         this.control.setSize(10, 10);
         this.control.setVisible(false);
@@ -39,12 +38,12 @@ public class WidgetHealthIndicator
             {
                 // Canvas canvas = (Canvas) e.widget;
                 e.gc.setBackground(e.display.getSystemColor(SWT.COLOR_YELLOW));
-                e.gc.fillRoundRectangle(1, 1, 5, 5, 10, 10);
+                e.gc.fillRoundRectangle(1, 5, 5, 5, 10, 10);
             }
         });
         GridDataFactory.fillDefaults().hint(10, 10).applyTo(this.control);
 
-        InfoToolTip.attach(this.control, this.getTooltip());
+        InfoToolTip.attach(this.control, this::getTooltip);
     }
 
     public Control getControl()
@@ -52,29 +51,35 @@ public class WidgetHealthIndicator
         return control;
     }
 
-    public void update()
+    public void setSecurities(List<Security> securities)
     {
-        this.control.setVisible(!this.getOutdatedSecurities().isEmpty());
-        // @todo update tooltip?
+        // remove duplicates
+        this.securities = new ArrayList<>(new HashSet<>(securities));
+        this.update();
     }
 
-    private List<Security> getOutdatedSecurities()
+    public void update()
     {
-        // @todo make configurable
-        LocalDate daysAgo = LocalDate.now().minusDays(7);
+        this.control.setVisible(!this.getStaleSecurities().isEmpty());
+    }
 
-        return this.index.getSecurities().stream()
-                        .filter(s -> !s.isRetired()
-                                        && (s.getLatest() == null || s.getLatest().getDate().isBefore(daysAgo)))
+    private List<Security> getStaleSecurities()
+    {
+        return this.securities.stream()
+                        .filter(s -> (new SecurityTimeliness(s)).isStale())
                         .collect(Collectors.toList());
     }
 
     private String getTooltip()
     {
-        return "Die Kurse folgender Wertpapiere sind älter als 7 Tage, das dargestellte Ergebnis gibt daher evtl. nicht den aktuellen Stand wieder:\n\n"
-                        + this.getOutdatedSecurities().stream()
-                        .map(s -> s.getName() + " (" + Values.Date.format(s.getLatest().getDate()) + ")")
+        if (this.securities == null)
+            return ""; //$NON-NLS-1$
+
+        return "Die aktuellen Kurse folgender Wertpapiere sind älter als X Tage, das dargestellte Ergebnis gibt daher evtl. nicht den momentanen Stand wieder:\n\n"
+                        + this.getStaleSecurities().stream()
+                                        .map(s -> s.getName() + " (" + Values.Date.format(s.getLatest().getDate()) //$NON-NLS-1$
+                                                        + ")") //$NON-NLS-1$
                         .sorted()
-                        .collect(Collectors.joining("\n"));
+                                        .collect(Collectors.joining("\n")); //$NON-NLS-1$
     }
 }

@@ -2,6 +2,7 @@ package name.abuchen.portfolio.ui.views.dashboard;
 
 import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
@@ -23,11 +24,13 @@ import com.google.common.collect.Lists;
 import name.abuchen.portfolio.model.ConfigurationSet;
 import name.abuchen.portfolio.model.Dashboard;
 import name.abuchen.portfolio.model.Dashboard.Widget;
+import name.abuchen.portfolio.model.Security;
 import name.abuchen.portfolio.snapshot.Aggregation;
 import name.abuchen.portfolio.ui.Messages;
 import name.abuchen.portfolio.ui.PortfolioPlugin;
 import name.abuchen.portfolio.ui.util.LabelOnly;
 import name.abuchen.portfolio.ui.util.SimpleAction;
+import name.abuchen.portfolio.ui.util.WidgetHealthIndicator;
 import name.abuchen.portfolio.ui.util.chart.TimelineChart;
 import name.abuchen.portfolio.ui.util.format.AmountNumberFormat;
 import name.abuchen.portfolio.ui.util.format.ThousandsNumberFormat;
@@ -173,6 +176,7 @@ public class ChartWidget extends WidgetDelegate<Object>
 
     private Label title;
     private TimelineChart chart;
+    private WidgetHealthIndicator healthIndicator;
 
     public ChartWidget(Widget widget, DashboardData dashboardData, DataSeries.UseCase useCase)
     {
@@ -194,9 +198,15 @@ public class ChartWidget extends WidgetDelegate<Object>
         Composite container = new Composite(parent, SWT.NONE);
         GridLayoutFactory.fillDefaults().numColumns(1).margins(5, 5).applyTo(container);
 
-        title = new Label(container, SWT.NONE);
+        Composite containerHeader = new Composite(container, SWT.NONE);
+        containerHeader.setBackground(parent.getBackground());
+        GridLayoutFactory.fillDefaults().numColumns(2).applyTo(containerHeader);
+
+        title = new Label(containerHeader, SWT.NONE);
         title.setText(TextUtil.tooltip(getWidget().getLabel()));
         GridDataFactory.fillDefaults().grab(true, false).applyTo(title);
+
+        healthIndicator = new WidgetHealthIndicator(containerHeader);
 
         chart = new TimelineChart(container);
         chart.getTitle().setVisible(false);
@@ -247,6 +257,13 @@ public class ChartWidget extends WidgetDelegate<Object>
     public void update(Object object)
     {
         title.setText(TextUtil.tooltip(getWidget().getLabel()));
+        title.requestLayout();
+
+        Interval interval = get(ReportingPeriodConfig.class).getReportingPeriod().toInterval(LocalDate.now());
+        List<Security> securities = new ArrayList<Security>();
+        new DataSeriesSerializer().fromString(dataSeriesSet, get(ChartConfig.class).getData())
+                        .forEach(s -> securities.addAll(getDashboardData().getDataSeriesCache().lookup(s, interval).getSecurities()));
+        healthIndicator.setSecurities(securities);
 
         try
         {

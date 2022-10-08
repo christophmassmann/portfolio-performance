@@ -60,10 +60,7 @@ public abstract class AbstractIndicatorWidget<D> extends WidgetDelegate<D>
         title.setData(UIConstants.CSS.CLASS_NAME, UIConstants.CSS.TITLE);
         GridDataFactory.fillDefaults().grab(true, false).applyTo(title);
 
-        PerformanceIndex index = this.getDashboardData().calculate(get(DataSeriesConfig.class).getDataSeries(),
-                        get(ReportingPeriodConfig.class).getReportingPeriod().toInterval(LocalDate.now()));
-
-        this.healthIndicator = new WidgetHealthIndicator(containerHeader, index);
+        this.healthIndicator = new WidgetHealthIndicator(containerHeader);
 
         indicator = new ColoredLabel(container, SWT.NONE);
         indicator.setData(UIConstants.CSS.CLASS_NAME, UIConstants.CSS.KPI);
@@ -91,6 +88,9 @@ public abstract class AbstractIndicatorWidget<D> extends WidgetDelegate<D>
         this.title.setText(TextUtil.tooltip(getWidget().getLabel()));
         this.title.requestLayout();
 
-        this.healthIndicator.update();
+        PerformanceIndex index = this.getDashboardData().getDataSeriesCache().lookup(
+                        get(DataSeriesConfig.class).getDataSeries(),
+                        get(ReportingPeriodConfig.class).getReportingPeriod().toInterval(LocalDate.now()));
+        this.healthIndicator.setSecurities(index.getSecurities());
     }
 }

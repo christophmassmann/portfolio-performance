@@ -21,6 +21,7 @@ import name.abuchen.portfolio.money.Values;
 import name.abuchen.portfolio.ui.UIConstants;
 import name.abuchen.portfolio.ui.util.InfoToolTip;
 import name.abuchen.portfolio.ui.util.SWTHelper;
+import name.abuchen.portfolio.ui.util.WidgetHealthIndicator;
 import name.abuchen.portfolio.ui.util.swt.ColoredLabel;
 import name.abuchen.portfolio.ui.views.dashboard.DashboardData;
 import name.abuchen.portfolio.ui.views.dashboard.DashboardResources;
@@ -33,6 +34,7 @@ public abstract class AbstractHeatmapWidget<N extends Number> extends WidgetDele
     private Composite table;
     private Label title;
     private DashboardResources resources;
+    protected WidgetHealthIndicator healthIndicator;
 
     public AbstractHeatmapWidget(Widget widget, DashboardData data)
     {
@@ -50,10 +52,16 @@ public abstract class AbstractHeatmapWidget<N extends Number> extends WidgetDele
         GridLayoutFactory.fillDefaults().numColumns(1).margins(5, 5).applyTo(container);
         container.setBackground(parent.getBackground());
 
-        title = new Label(container, SWT.NONE);
+        Composite containerHeader = new Composite(container, SWT.NONE);
+        containerHeader.setBackground(parent.getBackground());
+        GridLayoutFactory.fillDefaults().numColumns(2).applyTo(containerHeader);
+
+        title = new Label(containerHeader, SWT.NONE);
         title.setBackground(container.getBackground());
         title.setText(getWidget().getLabel() != null ? TextUtil.tooltip(getWidget().getLabel()) : ""); //$NON-NLS-1$
         GridDataFactory.fillDefaults().grab(true, false).applyTo(title);
+
+        healthIndicator = new WidgetHealthIndicator(containerHeader);
 
         table = new Composite(container, SWT.NONE);
         GridDataFactory.fillDefaults().grab(true, false).applyTo(table);
@@ -139,6 +147,7 @@ public abstract class AbstractHeatmapWidget<N extends Number> extends WidgetDele
     public void update(HeatmapModel<N> model)
     {
         title.setText(getWidget().getLabel() != null ? TextUtil.tooltip(getWidget().getLabel()) : ""); //$NON-NLS-1$
+        title.requestLayout();
 
         for (Control child : table.getChildren())
             child.dispose();
