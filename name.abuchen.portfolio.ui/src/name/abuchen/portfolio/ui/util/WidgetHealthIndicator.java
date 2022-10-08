@@ -1,5 +1,6 @@
 package name.abuchen.portfolio.ui.util;
 
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -66,7 +67,7 @@ public class WidgetHealthIndicator
     private List<Security> getStaleSecurities()
     {
         return this.securities.stream()
-                        .filter(s -> (new SecurityTimeliness(s)).isStale())
+                        .filter(s -> (new SecurityTimeliness(s, Clock.systemDefaultZone())).isStale())
                         .collect(Collectors.toList());
     }
 
